@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import TripForm from './components/TripForm'
 import Dashboard from './components/Dashboard'
+import UserMenu from './components/UserMenu'
 import { decodePlan, encodePlan } from './engine/share'
 import type { TripInput } from './engine/plan'
 import type { Tier } from './data/catalog'
@@ -30,7 +31,10 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <a href="#/" className="brand" onClick={() => setDraft(undefined)}><span className="logo">◎</span> Trip Planner</a>
-        <span className="tag">Phase 1 · mock data</span>
+        <div className="topright">
+          <span className="tag">Mock data</span>
+          <UserMenu />
+        </div>
       </header>
       <main>
         {route.view === 'form' && <TripForm initial={draft} onSubmit={(i) => go(i)} />}
