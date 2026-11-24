@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Tier } from '../data/catalog'
 import type { TripInput } from '../engine/plan'
 import { shareUrl } from '../engine/share'
+import SaveTripButton from './SaveTripButton'
 
 export default function ShareBar({ input, tier, onEdit }: { input: TripInput; tier: Tier; onEdit: () => void }) {
   const [msg, setMsg] = useState('')
@@ -15,6 +16,7 @@ export default function ShareBar({ input, tier, onEdit }: { input: TripInput; ti
   }
   return (
     <div className="sharebar">
+      <SaveTripButton input={input} tier={tier} />
       <button className="btn primary" onClick={copy}>{msg || 'Copy share link'}</button>
       {'share' in navigator && <button className="btn" onClick={share}>Share</button>}
       <button className="btn ghost" onClick={onEdit}>Edit trip</button>
