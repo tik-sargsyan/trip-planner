@@ -1,29 +1,39 @@
 import NextAuth from 'next-auth'
-import type { Provider } from 'next-auth/providers'
-import GitHub from 'next-auth/providers/github'
-import Google from 'next-auth/providers/google'
-import { DrizzleAdapter } from '@auth/drizzle-adapter'
+import Credentials from 'next-auth/providers/credentials'
+import { eq } from 'drizzle-orm'
 import { dbConfigured, getDb } from './db'
-import { accounts, sessions, users, verificationTokens } from './db/schema'
+import { users } from './db/schema'
+import { normalizeEmail, verifyPassword } from './lib/password'
 
-// Providers switch on only when their keys are set, so local dev works without them.
-const providers: Provider[] = []
-if (process.env.AUTH_GOOGLE_ID) providers.push(Google)
-if (process.env.AUTH_GITHUB_ID) providers.push(GitHub)
+// Email and password sign-in. Sessions are signed JWT cookies; users live in Postgres.
+export const authReady = dbConfigured
 
-export const authReady = dbConfigured && providers.length > 0
-
-export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
-  adapter: dbConfigured
-    ? DrizzleAdapter(getDb(), { usersTable: users, accountsTable: accounts, sessionsTable: sessions, verificationTokensTable: verificationTokens })
-    : undefined,
-  session: { strategy: dbConfigured ? 'database' : 'jwt' },
-  providers,
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  session: { strategy: 'jwt' },
   trustHost: true,
+  pages: { signIn: '/login' },
+  providers: [
+    Credentials({
+      credentials: { email: {}, password: {} },
+      async authorize(c) {
+        if (!dbConfigured) return null
+        const email = typeof c?.email === 'string' ? normalizeEmail(c.email) : ''
+        const password = typeof c?.password === 'string' ? c.password : ''
+        if (!email || !password) return null
+        const [u] = await getDb().select().from(users).where(eq(users.email, email)).limit(1)
+        if (!u || !(await verifyPassword(password, u.passwordHash))) return null
+        return { id: u.id, email: u.email, name: u.name }
+      },
+    }),
+  ],
   callbacks: {
-    session({ session, user }) {
-      if (user && session.user) session.user.id = user.id
+    jwt({ token, user }) {
+      if (user?.id) token.uid = user.id
+      return token
+    },
+    session({ session, token }) {
+      if (session.user && typeof token.uid === 'string') session.user.id = token.uid
       return session
     },
   },
-}))
+})

@@ -33,7 +33,7 @@ export default async function TripsPage() {
       </header>
       <main>
         <h1>My Trips</h1>
-        {!authReady && <p className="card warn">Sign-in is not set up on this server yet. Add the database and a login provider to enable My Trips.</p>}
+        {!authReady && <p className="card warn">Accounts are not set up on this server yet. The database is missing.</p>}
         {authReady && !userId && <SignInPrompt />}
         {userId && <TripsList initial={items} />}
       </main>
