@@ -170,3 +170,32 @@ legend { font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 
 .it.match span:first-child::before { content: '★ '; color: var(--accent); }
 .leg-it { color: var(--muted); }
 .it.free { color: var(--muted); font-style: italic; }
+
+/* phase 2a: live data */
+.small { font-size: 13px; margin: 0; }
+.money-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.seg button { font: inherit; font-size: 14px; font-weight: 600; min-height: 38px; padding: 6px 14px; border: 0; background: transparent; color: var(--text); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.stop .credit { font-size: 12px; margin: 0 0 6px; }
+.stop a, .sources a { color: var(--accent); }
+.more-sights { font-size: 13px; color: var(--text) !important; margin: 8px 0 0 !important; }
+.route-map { height: 340px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
+.route-sketch { margin: 0; }
+.route-sketch svg { width: 100%; height: auto; background: var(--surface-2); border-radius: 12px; }
+.route-sketch figcaption { font-size: 13px; margin-top: 6px; }
+.map-pin {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  background: #0f766e; color: #fff; font: 700 13px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+  border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35);
+}
+.map-pin.home { background: #fff; color: #0f766e; border-color: #0f766e; font-size: 15px; }
+.day-note { margin: 0 0 6px; padding: 6px 10px; font-size: 13px; border-radius: 8px; background: var(--warn-soft); color: var(--text); border-left: 3px solid var(--warn); }
+.sources ul { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.sources li { display: flex; gap: 10px; align-items: baseline; }
+.src-status { flex: none; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); min-width: 76px; text-align: center; }
+.src-status.live { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.src-status.fallback { background: var(--warn-soft); border-color: var(--warn); color: var(--text); }
+.tiers.wide .mini { grid-template-columns: 1fr; }

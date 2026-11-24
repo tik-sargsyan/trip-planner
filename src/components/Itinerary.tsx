@@ -1,7 +1,9 @@
 import type { Day } from '../engine/plan'
 import { MODE_ICON, hrs, niceDate, usd } from '../format'
 
-export default function Itinerary({ days }: { days: Day[] }) {
+export default function Itinerary({ days, fmt = usd, notes = {} }: {
+  days: Day[]; fmt?: (n: number) => string; notes?: Record<string, string[]>
+}) {
   return (
     <div className="days">
       {days.map((d) => (
@@ -11,13 +13,14 @@ export default function Itinerary({ days }: { days: Day[] }) {
             <span className="daydate">{niceDate(d.date)}</span>
           </header>
           <h3>{d.title}</h3>
+          {notes[d.date]?.map((n) => <p key={n} className="day-note">{n}</p>)}
           <ul>
             {d.items.map((it, i) => it.kind === 'leg' ? (
               <li key={i} className="it leg-it"><span>{MODE_ICON[it.leg.mode]} {it.leg.label}</span><span className="muted">{hrs(it.leg.hours)}</span></li>
             ) : (
               <li key={i} className={'it' + (it.match ? ' match' : '')}>
                 <span>{it.site.name}</span>
-                <span className="muted">{hrs(it.site.hours)} · {it.cost ? usd(it.cost) : 'free'}</span>
+                <span className="muted">{hrs(it.site.hours)} · {it.cost ? fmt(it.cost) : 'free'}</span>
               </li>
             ))}
             {d.freeHours >= 2 && <li className="it free"><span>Free time in {d.city}</span><span className="muted">{hrs(d.freeHours)}</span></li>}

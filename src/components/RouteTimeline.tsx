@@ -1,7 +1,7 @@
 import type { Leg } from '../data/transport'
 import { MODE_ICON, hrs, usd } from '../format'
 
-export default function RouteTimeline({ legs }: { legs: { leg: Leg; cost: number }[] }) {
+export default function RouteTimeline({ legs, fmt = usd }: { legs: { leg: Leg; cost: number }[]; fmt?: (n: number) => string }) {
   const total = legs.reduce((a, l) => a + l.cost, 0)
   return (
     <>
@@ -17,11 +17,11 @@ export default function RouteTimeline({ legs }: { legs: { leg: Leg; cost: number
                 {leg.note && <span>{leg.note}</span>}
               </div>
             </div>
-            <div className="leg-cost">{usd(cost)}</div>
+            <div className="leg-cost">{fmt(cost)}</div>
           </li>
         ))}
       </ol>
-      <div className="sumline"><span>All transport</span><strong>{usd(total)}</strong></div>
+      <div className="sumline"><span>All transport</span><strong>{fmt(total)}</strong></div>
     </>
   )
 }

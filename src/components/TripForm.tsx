@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { ACTIVITIES, ACTIVITY_LABEL, COUNTRIES, ORIGINS, type Activity } from '../data/catalog'
-import type { TripInput } from '../engine/plan'
+import { localIso, type TripInput } from '../engine/plan'
 
-const iso = (d: Date) => d.toISOString().slice(0, 10)
-const plusDays = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return iso(d) }
+const plusDays = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return localIso(d) }
 
 export default function TripForm({ initial, onSubmit }: { initial?: TripInput; onSubmit: (i: TripInput) => void }) {
   const [v, setV] = useState<TripInput>(initial ?? {
