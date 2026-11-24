@@ -49,6 +49,11 @@ export interface PlanResult {
 
 const DAY_HOURS = 7
 
+/** YYYY-MM-DD in local time. toISOString() uses UTC and shifts the date by a day east of UTC. */
+export function localIso(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function legCost(leg: Leg, people: number, tier: Tier) {
   if (leg.mode === 'car') return leg.pricePerPerson * Math.ceil(people / 3)
   if (leg.mode === 'transfer' && tier > 0) return leg.pricePerPerson * Math.ceil(people / 4)
@@ -141,7 +146,7 @@ function buildTier(ctx: {
   const add = (leg: Leg) => { const c = legCost(leg, people, tier); legs.push({ leg, cost: c }); return { kind: 'leg' as const, leg, cost: c } }
 
   const days: Day[] = []
-  const dateOf = (i: number) => { const d = new Date(start); d.setDate(d.getDate() + i); return d.toISOString().slice(0, 10) }
+  const dateOf = (i: number) => { const d = new Date(start); d.setDate(d.getDate() + i); return localIso(d) }
   const actMult = [1, 1.15, 1.6][tier]
   const used = new Set<string>()
   let dayIdx = 0
