@@ -18,7 +18,7 @@ export default function RouteMap({ points, flightEnds, onStatus }: {
   useEffect(() => {
     if (!box.current || points.length < 2) return
     let off = false
-    let loaded = false
+    let loaded = false // style reached: the tile service answered
     let map: { remove: () => void } | undefined
     const give = () => { if (!off && !loaded) { setFailed(true); onStatus?.('fallback') } }
     const timer = setTimeout(give, 12000)
@@ -42,10 +42,14 @@ export default function RouteMap({ points, flightEnds, onStatus }: {
       m.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right')
       // A single tile or sprite error is not fatal. Only fall back if the map never loads (see timer).
       m.on('error', (e) => console.warn('[RouteMap]', e.error?.message ?? e))
-      m.on('load', () => {
+      // 'load' waits for animation frames, which a background tab pauses. The style
+      // arriving is enough proof that the map works, so stop the fallback timer here.
+      m.once('styledata', () => {
         loaded = true
         clearTimeout(timer)
         onStatus?.('live')
+      })
+      m.on('load', () => {
         const seg = (a: MapPoint, b: MapPoint) => [[a.lon, a.lat], [b.lon, b.lat]]
         const legs = points.slice(1).map((p, i) => ({ coords: seg(points[i], p), flight: flightEnds && (i === 0 || i === points.length - 2) }))
         const feature = (flight: boolean) => ({
