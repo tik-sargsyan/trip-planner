@@ -68,7 +68,13 @@ export function scoreCity(c: City, acts: Activity[], month: number) {
   return { score, reasons }
 }
 
-export function buildPlan(input: TripInput): PlanResult {
+export interface PlanOptions {
+  /** Multiplier for stay and food costs, from the live country price level. 1 = mock prices. */
+  costFactor?: number
+}
+
+export function buildPlan(input: TripInput, opts: PlanOptions = {}): PlanResult {
+  const costFactor = opts.costFactor && opts.costFactor > 0 ? opts.costFactor : 1
   const origin = originById(input.origin)
   const country = countryById(input.country)
   const start = new Date(input.start + 'T00:00:00')
@@ -119,7 +125,7 @@ export function buildPlan(input: TripInput): PlanResult {
   const exit = last.airport ? last : (stops.map((s) => s.city).filter((c) => c.airport).sort((a, b) => km(last, a) - km(last, b))[0] ?? cityById(country.hub))
 
   const tiers = ([0, 1, 2] as Tier[]).map((tier) =>
-    buildTier({ tier, stops, origin, country, entry, exit, start, nights, month, people, input, seed, sameCountry }))
+    buildTier({ tier, stops, origin, country, entry, exit, start, nights, month, people, input, seed, sameCountry, costFactor }))
 
   const fitting = tiers.filter((t) => t.fits)
   const recommended: Tier = fitting.length ? fitting[fitting.length - 1].tier : 0
@@ -128,7 +134,7 @@ export function buildPlan(input: TripInput): PlanResult {
 
 function buildTier(ctx: {
   tier: Tier; stops: CityStop[]; origin: ReturnType<typeof originById>; country: ReturnType<typeof countryById>
-  entry: City; exit: City; start: Date; nights: number; month: number; people: number; input: TripInput; seed: string; sameCountry: boolean
+  entry: City; exit: City; start: Date; nights: number; month: number; people: number; input: TripInput; seed: string; sameCountry: boolean; costFactor: number
 }): TierPlan {
   const { tier, stops, origin, country, entry, exit, start, month, people, input, seed } = ctx
   const legs: { leg: Leg; cost: number }[] = []
@@ -206,8 +212,9 @@ function buildTier(ctx: {
 
   const rooms = Math.ceil(people / 2)
   const transport = legs.reduce((a, l) => a + l.cost, 0)
-  const stay = stops.reduce((a, st) => a + st.city.stay[tier] * st.nights * rooms, 0)
-  const food = stops.reduce((a, st) => a + st.city.food[tier] * st.nights * people, 0)
+  const k = ctx.costFactor
+  const stay = Math.round(stops.reduce((a, st) => a + st.city.stay[tier] * st.nights * rooms, 0) * k)
+  const food = Math.round(stops.reduce((a, st) => a + st.city.food[tier] * st.nights * people, 0) * k)
   const activities = days.flatMap((d) => d.items).reduce((a, it) => a + (it.kind === 'site' ? it.cost : 0), 0)
   const total = transport + stay + food + activities
   return {
